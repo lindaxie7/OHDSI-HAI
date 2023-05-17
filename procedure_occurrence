@@ -1,0 +1,62 @@
+truncate ohdsi.procedure_occurrence;
+
+insert into ohdsi.procedure_occurrence (
+    procedure_occurrence_id,
+    person_id,
+
+    procedure_date,
+    procedure_datetime,
+    
+    procedure_source_value,
+    modifier_source_value,
+    quantity,
+    provider_id,
+    procedure_concept_id,
+    
+    procedure_type_concept_id,
+    modifier_concept_id,
+    
+    
+    visit_occurrence_id,
+    visit_detail_id,
+   
+    procedure_source_concept_id
+  
+  
+  
+)
+select
+	row_number()over(order by p.person_id) as procedure_occurrence_id,
+    p. person_id,
+  
+	pro."PROCEDURE_DATE_DK" as procedure_date,
+	pro."PROCEDURE_TIME_DK" as procedure_datetime,
+    pro."PROCEDURE_METHOD_CODE" as procedure_source_value,
+    pro."PROCEDURE_MODIFIER_1" as modifier_source_value,
+	
+	pro."PROCEDURE_COUNT" as quantity,
+	pro."ORDERING_PROVIDER_DK" as provider_id,
+    pro."PROCEDURE_CODE" as procedure_concept_id,
+    
+    32817 as procedure_type_concept_id,
+
+    
+    
+    0 as modifier_concept_id,
+    
+
+	v.visit_occurrence_id as visit_occurrence_id,
+	0 as visit_detail_id,
+    
+
+
+    
+	0 as procedure_source_concept_id
+
+    
+	
+   
+   
+from ohdsi."Procedure code" pro
+join ohdsi."person" p on p.person_source_value = pro."PATIENT_DK"
+/*join ohdsi."visit_occurrence" v on v.person_id = p.person_id*/

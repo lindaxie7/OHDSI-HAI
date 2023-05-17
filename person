@@ -1,0 +1,97 @@
+truncate ohdsi.person;
+
+insert into ohdsi.person (
+			person_id,
+			
+			year_of_birth,
+			month_of_birth,
+			day_of_birth,
+			birth_datetime,
+			race_concept_id,
+			ethnicity_concept_id,
+			person_source_value,
+			gender_source_value,
+			race_source_value,
+			ethnicity_source_value,
+			gender_concept_id,
+
+			location_id,
+			provider_id,
+			care_site_id,
+			
+			
+			gender_source_concept_id,		
+			
+			race_source_concept_id,
+			
+			ethnicity_source_concept_id,
+			age
+
+)
+select
+    	p."PATIENT_CLINIC_NUMBER" as person_id,
+
+	date_part('year', p."PATIENT_BIRTH_DATE") as year_of_birth,
+	date_part('month', p."PATIENT_BIRTH_DATE") as month_of_birth,
+	date_part('day', p."PATIENT_BIRTH_DATE") as day_of_birth,
+	p."PATIENT_BIRTH_DATE" as birth_datetime,
+
+	case p."PATIENT_RACE_NAME"
+		when 'White' then 8527
+		when 'Black' then 8516
+        when 'African American' then 8516
+        when 'African' then 8516
+        when 'Black or African American Other' then 8516
+        when 'American born African' then 8516
+        when 'Caribbean Black' then 8516
+		when 'ASIAN' then 8515
+        when 'Asian Indian' then 8515
+        when 'Asian Chinese' then 8515
+        when 'Asian Other' then 8515
+        when 'Asian Filipino' then 8515
+        when 'Asian Korean' then 8515
+        when 'Asian Vietnamese' then 8515
+        when 'Asian Cambodian' then 8515
+        when 'Asian Japanese' then 8515
+        when 'Asian Laotian' then 8515
+        when 'Asian Pakistani' then 8515
+        when 'Asian Thai' then 8515
+        when 'Asian Taiwanese' then 8515
+        
+        
+	else 0
+	end as race_concept_id,
+	case p."PATIENT_ETHNICITY_NAME" 
+        when 'Hispanic' then 38003563
+        when 'Mexican' then 38003563
+        when 'Central American' then 38003563
+        when 'Puerto Rican' then 38003563
+        when 'South American' then 38003563
+        when 'Other Spanish culture of origin regardless of race' then 38003563
+        when 'Cuban' then 38003563
+        when 'Other Spanish culture or origin' then 38003563       
+        else 0
+	end as ethnicity_concept_id,
+	p."PATIENT_DK" as person_source_value,
+	p."PATIENT_GENDER_NAME" as gender_source_value,
+	p."PATIENT_RACE_NAME" as race_source_value,
+	p."PATIENT_ETHNICITY_NAME" as ethnicity_source_value,
+	case upper(p."PATIENT_GENDER_NAME")
+		when 'MALE' then 8507
+		when 'FEMALE' then 8532
+   	else 0
+	end as gender_concept_id,
+
+	NULL as location_id,
+	NULL as provider_id,
+	NULL as care_site_id,
+
+	0 as gender_source_concept_id,
+
+	0 as race_source_concept_id,
+
+	0 as ethnicity_source_concept_id,
+	p."PATIENT_AGE" as age
+
+from ohdsi."patient " p
+where p."PATIENT_GENDER_NAME" is not null;

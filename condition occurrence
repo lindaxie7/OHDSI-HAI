@@ -1,0 +1,50 @@
+truncate ohdsi.condition_occurrence;
+
+insert into ohdsi.condition_occurrence (
+			condition_occurrence_id,
+			person_id,
+	
+			condition_start_date,
+			condition_start_datetime,
+			condition_end_date,
+			condition_end_datetime,
+			condition_type_concept_id,
+ 
+			stop_reason,
+			provider_id,
+			visit_occurrence_id,
+                        visit_detail_id,
+			condition_source_value,
+			condition_source_concept_id,
+			condition_status_source_value,
+       	    condition_status_concept_id,
+		    condition_concept_id
+)
+select
+		row_number()over(order by p.person_id) as condition_occurrence_id,
+		p.person_id,
+
+        da."DIAGNOSIS_DTM" as condition_start_date,
+		da."DIAGNOSIS_TIME_DK" as condition_start_datetime,
+		NULL as condition_end_date,
+		NULL as condition_end_datetime,
+       
+        
+		32817 as condition_type_concept_id,
+        
+        
+		cast(null as varchar) as stop_reason,
+		v.provider_id as provider_id,
+		v.visit_occurrence_id as visit_occurrence_id,
+		0 as visit_detail_id,
+  
+	    da."DIAGNOSIS_METHOD_CODE" as condition_source_value,
+        
+        0 as condition_source_concept_id,
+	    Null as condition_status_source_value,
+		0 as condition_status_concept_id,
+        cast("DIAGNOSIS_CODE" as int) as condition_concept_id
+               
+from ohdsi.diagnosis da
+join ohdsi."person" p on p.person_source_value = da."PATIENT_DK"
+join ohdsi."visit_occurrence" v on v.person_id = p.person_id

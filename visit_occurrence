@@ -1,0 +1,96 @@
+truncate ohdsi.visit_occurrence;
+
+insert into ohdsi.visit_occurrence (
+    visit_occurrence_id,
+    person_id,
+    visit_concept_id,
+    visit_start_date,
+    visit_start_datetime,
+    visit_end_date,
+    visit_end_datetime,
+    visit_type_concept_id,
+    provider_id,
+    care_site_id,
+    visit_source_value,
+    visit_source_concept_id,
+
+    admitting_source_concept_id,
+    admitting_source_value,
+ 
+    discharge_to_concept_id,
+    discharge_to_source_value,
+    preceding_visit_occurrence_id
+
+
+
+)
+select
+	row_number()over(order by p.person_id) as visit_occurrence_id,
+    p. person_id,
+    case a."PATIENT_PROCESS_TYPE"
+		when 'Emergency' then 8870
+		when 'Inpatient' then 8717
+        when 'Outpatient Surgery' then 9202
+        when 'OUTPATIENT' then 9202
+        when 'Urgent Care' then 8782
+        when 'Observation' then 581385
+       /* when 'SERIES' then */
+        when 'Hospital Outpatient' then 8756
+        when 'Outpatient in a Bed' then 8756
+        when 'EMERGENCY' then 9203
+        when 'OP in a bed' then 8756
+        /*when 'Surgery Admit' then */
+        when 'PRE-ADMIT TO INPATIENT' then 9201
+        when 'IP Behavioral Health' then 9201
+        when 'EMERGENCY TO INPATIENT' then 9201
+        when 'OUTPATIENT TO BEDDED OBSERVATION' then 9202
+        when 'IP Transitional Care' then 9201
+        when 'EMERGENCY TO BEDDED OBSERVATION' then 581385
+        /*when 'OUTPATIENT TO INPATIENT' then */
+        when 'DIRECT ADMIT AS INPATIENT' then 9201
+        when 'INPATIENT' then 9201
+        when 'IP Rehab' then 9201
+        /*when 'Infusion Series' then */
+        when 'IP Hospice' then 38004311
+        /*when 'Hospice - Respite' then */
+        /*when 'Clinic' then */
+        when 'Contracted IP Hospice' then 38004311
+        when 'Respite' then 38004440
+       /* when 'PBB Clinic Outpatient' then */
+       /* when 'Nuclear Medicine Series' then */
+        /*when 'Bone Marrow Transplant Series' then */
+        /*when 'Treatment Series' then */
+        
+        
+        
+             
+	else 0
+	end as visit_concept_id,
+	
+	a."ADMIT_DATE_DK" as visit_start_date,
+	a."ADMIT_TIME_DK" as visit_start_datetime,
+	a."DISCHARGE_DATE_DK" as visit_end_date,
+    a."DISCHARGE_TIME_DK" as visit_end_datetime,
+	
+	/*NULL as location_id,
+	NULL as provider_id,
+	NULL as care_site_id, */
+    32018 as visit_type_concept_id,
+	a."PROVIDER_DK" as provider_id,
+	a."LOCATION_DK" as care_site_id,
+    
+    NULL as visit_source_value,
+	0 as visit_source_concept_id,
+    
+    0 as admitting_source_concept_id,
+    NULL as admitting_source_value,
+    
+	0 as discharge_to_concept_id,
+    NULL as discharge_to_source_value,
+    
+	a."VISIT_NBR" as preceding_visit_occurrence_id
+ 
+   
+from ohdsi."hospital admission" a
+join ohdsi."person" p on p.person_source_value = a."PATIENT_DK"
+where p."gender_source_value" is not null;

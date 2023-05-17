@@ -1,0 +1,76 @@
+truncate ohdsi.measurement;
+
+insert into ohdsi.measurement (
+    measurement_id,
+    person_id,
+    measurement_concept_id,
+    measurement_source_value,
+    measurement_date,
+    measurement_datetime,
+    measurement_time,
+    measurement_type_concept_id,
+    operator_concept_id,
+    value_as_number,
+    value_as_concept_id,
+    unit_concept_id,
+    range_low,
+    range_high,
+    provider_id,
+    visit_occurrence_id,
+    visit_detail_id,
+    
+    measurement_source_concept_id,
+    unit_source_value,
+    value_source_value
+)
+select
+		row_number()over(order by p.person_id) as measurement_id,
+		p.person_id,
+        case f."FLOWSHEET_SUBTYPE_DESCRIPTION"
+		    when 'Diastolic BP (mmHg)' then 4152194
+                                                                                  
+           
+            when 'Pulse rate' then 4197762
+            when 'Pulse Rate/min' then 4197762
+            when 'Pulse Rate' then 4197762 
+            
+            when 'SpO2' then 4196147
+            when 'SPO2' then 4196147
+            when 'Resting SpO2' then 4196147
+            
+		    when 'Numeric Pain Score' then 4137083
+            when 'Numeric Pain Scale#1' then 4137083
+
+            when 'Temperature Value' then 4302666
+            
+        else 0
+	    end as measurement_concept_id,
+        
+        f."FLOWSHEET_SUBTYPE_DESCRIPTION" as measurement_source_value,
+
+	    f."FLOWSHEET_ASSESSMENT_DATE_DK" as measurement_date,
+        
+	    f."FLOWSHEET_ASSESSMENT_DTM" as measurement_datetime,
+        
+        f."FLOWSHEET_ASSESSMENT_TIME_DK" as measurement_time,
+
+        32817 as measurement_type_concept_id,
+        0 as operator_concept_id,
+        f."FLOWSHEET_RESULT_VAL" as value_as_number,
+        0 as value_as_concept_id,
+        0 as unit_concept_id,
+
+        NULL as range_low,
+        NULL as range_high,
+        f."PROVIDER_DK" as provider_id,
+        v."visit_occurrence_id" as visit_occurrence_id,
+        0 as visit_detail_id,
+        
+   
+        0 as measurement_source_concept_id,
+        f."FLOWSHEET_UNIT_OF_MEASURE_TXT" as unit_source_value,
+        f."FLOWSHEET_RESULT_TXT" as value_source_value
+
+from ohdsi."flowsheets" f
+join ohdsi."person" p on p.person_source_value = f."PATIENT_DK"
+join ohdsi."visit_occurrence" v on v.person_id = p.person_id
